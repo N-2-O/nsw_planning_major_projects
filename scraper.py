@@ -3,9 +3,6 @@
 
 import scraperwiki
 import lxml.html
-import os
-import requests
-import cssselect
 import datetime
 
 base_html = "http://www.planningportal.nsw.gov.au"
