@@ -20,7 +20,6 @@ def get_applications():
 def get_data(data):
 	root = lxml.html.fromstring(data).find('body')
 	applications = root.cssselect("div[class='card__content']")
-	appDict = []
 	for i in applications:
 		refId = i.cssselect("div[class='field field-field-case-id field-type-string field-label-hidden']")
 		address = i.cssselect("div")
@@ -36,18 +35,23 @@ def get_data(data):
 			"info_url" : base_html + ''.join(link[0].items()[0][1]),
 			"date_scraped" : time
 		}
-		appDict.append(thisApplication)
-	return appDict
+		try:
+			store_data(thisApplication)
+		except Exception as e:
+			print("Could not save\n")
+			raise e
 
-def store_db(data):
-	for application in data:
-		print(application)
-		scraperwiki.sql.save(unique_keys=['council_reference'], data=application, table_name="data")
+def store_data(application):
+	scraperwiki.sql.save(unique_keys=['council_reference'], data=application, table_name="data")
+
+# def store_db(data):
+# 	for application in data:
+# 		print(application)
+# 		scraperwiki.sql.save(unique_keys=['council_reference'], data=application, table_name="data")
 	
 def main():
 	html = get_applications()
-	data = get_data(html)
-	store_db(data)
+	get_data(html)
 	quit()
 
 main()
