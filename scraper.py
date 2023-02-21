@@ -11,15 +11,17 @@ import datetime
 base_html = "http://www.planningportal.nsw.gov.au"
 
 #get html from source
-def get_applications():
+def get_applications(page):
+	# print("Visiting page {}...".format(page))
 	#pretend to be an ipad to bypass cloudflare protection with user-agent
 	userAgent = 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
-	return scraperwiki.scrape("http://www.planningportal.nsw.gov.au/major-projects/projects?status=Exhibition","",userAgent) #on exhibition only!
+	return scraperwiki.scrape("http://www.planningportal.nsw.gov.au/major-projects/projects?status=Exhibition&page={}".format(page),"",userAgent) #on exhibition only!
 
 #extract needed data from html
 def get_data(data):
 	root = lxml.html.fromstring(data).find('body')
 	applications = root.cssselect("div[class='card__content']")
+	appDict = []
 	for i in applications:
 		refId = i.cssselect("div[class='field field-field-case-id field-type-string field-label-hidden']")
 		address = i.cssselect("div")
@@ -35,13 +37,21 @@ def get_data(data):
 			"info_url" : base_html + ''.join(link[0].items()[0][1]),
 			"date_scraped" : time
 		}
-		try:
-			store_data(thisApplication)
-		except Exception as e:
-			print("Could not save\n")
-			raise e
+		# print("\tApplication was scraped successfully!")
+		# save space by saving each application here
+
+		# try:
+		# 	store_data(thisApplication)
+		# except Exception as e:
+		# 	print("Could not save\n")
+		# 	raise e
+        # # print(thisApplication, "\n\n")
+		appDict.append(thisApplication)
+	return appDict
+		
 
 def store_data(application):
+	print(application)
 	scraperwiki.sql.save(unique_keys=['council_reference'], data=application, table_name="data")
 
 # def store_db(data):
@@ -50,8 +60,17 @@ def store_data(application):
 # 		scraperwiki.sql.save(unique_keys=['council_reference'], data=application, table_name="data")
 	
 def main():
-	html = get_applications()
-	get_data(html)
+	applications = []
+	page = 0
+	html = get_applications(page)
+	apps = get_data(html)
+	while apps:
+		applications.extend(apps)
+		page = page + 1
+		html = get_applications(page)
+		apps = get_data(html)
+	# for app in applications:
+	# 	print(app, "\n")
 	quit()
 
 main()
