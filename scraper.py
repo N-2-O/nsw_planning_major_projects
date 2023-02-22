@@ -1,6 +1,3 @@
-# This is a template for a Python scraper on morph.io (https://morph.io)
-# including some code snippets below that you should find helpful
-
 import scraperwiki
 import datetime
 from bs4 import BeautifulSoup
@@ -14,12 +11,14 @@ base_html = "https://www.planningportal.nsw.gov.au"
 def get_applications(page):
 	#pretend to be an ipad to bypass cloudflare protection with user-agent
 	userAgent = 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
-	return scraperwiki.scrape("https://www.planningportal.nsw.gov.au/major-projects/projects?status=Exhibition&page={}".format(page),"",userAgent) #on exhibition only!
+	return scraperwiki.scrape("https://www.planningportal.nsw.gov.au/major-projects/projects?status=All&lga=All&development_type=All&industry_type=All&case_type=All&page={}".format(page),"",userAgent)
 
 #extract needed data from html
-def get_data(data):
+def get_data(data, conn):
 	page = BeautifulSoup(data, "html.parser")
-	applications = []
+	if not page.find(class_="card__content"):
+		# print("No applications here")
+		return False
 	for table in page.find_all(class_="card__content"):
 		refId = table.find(class_ = "field field-field-case-id field-type-string field-label-hidden").get_text().strip()
 		address = table.find(class_ = "card__title").find_next_sibling().get_text().strip()
@@ -28,20 +27,17 @@ def get_data(data):
 		link = table.find("a", href = True)["href"]
 		time = datetime.datetime.now().strftime("%x")
 		thisApplication = (refId, address, council, name, base_html + link, time)
-		applications.append(thisApplication)
-	return applications
+		sqlitedb.store_data(thisApplication, conn)
+	return True
 
-def visit_pages():
-	applications = []
+def visit_pages(conn):
 	page = 0
 	html = get_applications(page)
-	apps = get_data(html)
+	apps = get_data(html, conn)
 	while apps:
-		applications.extend(apps)
 		page = page + 1
 		html = get_applications(page)
-		apps = get_data(html)
-	return applications
+		apps = get_data(html, conn)
 
 def main():
 	# Connect to database
@@ -49,9 +45,7 @@ def main():
 	if conn is not None:
 		# Create table if not already created
 		sqlitedb.create_table(conn)
-		applications = visit_pages()
-		for app in applications:
-			sqlitedb.store_data(app, conn)
+		visit_pages(conn)
 	else:
 		print("Error creating table.")
 	quit()
