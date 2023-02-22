@@ -19,7 +19,9 @@ def create_table(conn):
 			council TEXT,
 			description TEXT,
 			info_url TEXT,
-			date_scraped DATE
+			date_scraped DATE,
+			on_notice_from DATE,
+			on_notice_to DATE
 			);"""
 		cur.execute(table)
 		# print("Table created")
@@ -46,8 +48,8 @@ def update_table(conn):
 		print(e)
 
 def store_data(data, conn):
-	# replace if exists
-	sql = """	INSERT OR REPLACE INTO data(council_reference, address, council, description, info_url, date_scraped, on_notice_from, on_notice_to)
+	# ignore if exists
+	sql = """	INSERT OR IGNORE INTO data(council_reference, address, council, description, info_url, date_scraped, on_notice_from, on_notice_to)
 				VALUES(?, ?, ?, ?, ?, ?, ?, ?)"""
 	cur = conn.cursor()
 	cur.execute(sql, data)
