@@ -22,7 +22,7 @@ def create_table(conn):
 			date_scraped DATE
 			);"""
 		cur.execute(table)
-		print("Table created")
+		# print("Table created")
 	except Error as e:
 		print(e)
 
