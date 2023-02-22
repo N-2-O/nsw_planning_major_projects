@@ -57,7 +57,7 @@ def main():
 	if conn is not None:
 		# Create table if not already created
 		sqlitedb.create_table(conn)
-		sqlitedb.update_table(conn)
+		# sqlitedb.update_table(conn)
 		visit_pages(conn)
 	else:
 		print("Error creating table.")
