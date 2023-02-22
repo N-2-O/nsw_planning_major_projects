@@ -4,6 +4,9 @@
 import scraperwiki
 import datetime
 from bs4 import BeautifulSoup
+import os
+import sqlitedb
+os.environ["SCRAPERWIKI_DATABASE_NAME"] = "sqlite:///data.sqlite"
 
 base_html = "http://www.planningportal.nsw.gov.au"
 
@@ -31,19 +34,24 @@ def get_data(data):
 		# print(">\tLink:\t", link)
 		# print(">\tTime:\t", time)
 		# print("-------------------------------")
-		thisApplication = {
-			"council_reference" : refId,
-			"address" : address,
-			"council" : council,
-			"description" : name,
-			"info_url" : base_html + link,
-			"date_scraped" : time
-		}
+		thisApplication = (
+			refId,
+			address,
+			council,
+			name,
+			base_html + link,
+			time
+		)
+		# thisApplication = {
+		# 	"council_reference" : refId,
+		# 	"address" : address,
+		# 	"council" : council,
+		# 	"description" : name,
+		# 	"info_url" : base_html + link,
+		# 	"date_scraped" : time
+		# }
 		applications.append(thisApplication)
 	return applications
-
-def store_data(application):
-	scraperwiki.sql.save(unique_keys=['council_reference'], data=application, table_name="data")
 
 def visit_pages():
 	applications = []
@@ -58,13 +66,21 @@ def visit_pages():
 	return applications
 
 def main():
+	conn = sqlitedb.create_database()
+	if conn is not None:
+		sqlitedb.create_table(conn)
+	else:
+		print("Error creating table.")
+
 	applications = visit_pages()
-	
 	for app in applications:
-		store_data(app)
+		# print(app)
+		print("----------------------")
+		sqlitedb.store_data(app, conn)
 	quit()
 
-main()
+if __name__ == '__main__':
+	main()
 
 #
 # # Write out to the sqlite database using scraperwiki library
