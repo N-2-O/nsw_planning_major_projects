@@ -27,7 +27,7 @@ def create_table(conn):
 		print(e)
 
 def store_data(data, conn):
-	sql = """   INSERT INTO data(council_reference, address, council, description, info_url, date_scraped)
+	sql = """   INSERT OR IGNORE INTO data(council_reference, address, council, description, info_url, date_scraped)
                 VALUES(?, ?, ?, ?, ?, ?)"""
 	cur = conn.cursor()
 	cur.execute(sql, data)
