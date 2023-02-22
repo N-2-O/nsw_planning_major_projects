@@ -11,7 +11,17 @@ base_html = "https://www.planningportal.nsw.gov.au"
 def get_applications(page):
 	#pretend to be an ipad to bypass cloudflare protection with user-agent
 	userAgent = 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
-	return scraperwiki.scrape("https://www.planningportal.nsw.gov.au/major-projects/projects?status=All&lga=All&development_type=All&industry_type=All&case_type=All&page={}".format(page),"",userAgent)
+	return scraperwiki.scrape("https://www.planningportal.nsw.gov.au/major-projects/projects?status=Exhibition&lga=All&development_type=All&industry_type=All&case_type=All&page={}".format(page),"",userAgent)
+
+def get_application_exhibition(link):
+	# print("Visiting page: ", link)
+	userAgent = 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+	page = scraperwiki.scrape(link, "", userAgent)
+	page = BeautifulSoup(page, "html.parser")
+	d = []
+	for dates in page.find_all("time"):
+		d.append(dates.get_text())
+	return d[0], d[1]
 
 #extract needed data from html
 def get_data(data, conn):
@@ -26,7 +36,9 @@ def get_data(data, conn):
 		name = table.find(class_ = "card__title").get_text().strip()
 		link = table.find("a", href = True)["href"]
 		time = datetime.datetime.now().strftime("%x")
-		thisApplication = (refId, address, council, name, base_html + link, time)
+		# get exhibition dates
+		start, end = get_application_exhibition(base_html + link)
+		thisApplication = (refId, address, council, name, base_html + link, time, start, end)
 		sqlitedb.store_data(thisApplication, conn)
 	return True
 
@@ -45,6 +57,7 @@ def main():
 	if conn is not None:
 		# Create table if not already created
 		sqlitedb.create_table(conn)
+		sqlitedb.update_table(conn)
 		visit_pages(conn)
 	else:
 		print("Error creating table.")
