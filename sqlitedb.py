@@ -15,10 +15,10 @@ def create_table(conn):
 		cur = conn.cursor()
 		table = """CREATE TABLE IF NOT EXISTS data (
 			council_reference VARCHAR(20) PRIMARY KEY,
-			address VARCHAR(100),
-			council VARCHAR(50),
+			address TEXT,
+			council TEXT,
 			description TEXT,
-			info_url VARCHAR(200),
+			info_url TEXT,
 			date_scraped DATE
 			);"""
 		cur.execute(table)
