@@ -25,10 +25,30 @@ def create_table(conn):
 		# print("Table created")
 	except Error as e:
 		print(e)
+		
+def update_table(conn):
+	try:
+		cur = conn.cursor()
+		q = """ ALTER TABLE data
+				ADD COLUMN on_notice_from DATE;
+				"""
+		cur.execute(q)
+		# print("Column added")
+	except Error as e:
+		print(e)
+	try:
+		q = """ ALTER TABLE data
+				ADD COLUMN on_notice_to DATE;
+				"""
+		cur.execute(q)
+		# print("Column added")
+	except Error as e:
+		print(e)
 
 def store_data(data, conn):
-	sql = """   INSERT OR IGNORE INTO data(council_reference, address, council, description, info_url, date_scraped)
-                VALUES(?, ?, ?, ?, ?, ?)"""
+	# replace if exists
+	sql = """	INSERT OR REPLACE INTO data(council_reference, address, council, description, info_url, date_scraped, on_notice_from, on_notice_to)
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?)"""
 	cur = conn.cursor()
 	cur.execute(sql, data)
 	conn.commit()
