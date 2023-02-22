@@ -48,8 +48,8 @@ def update_table(conn):
 		print(e)
 
 def store_data(data, conn):
-	# ignore if exists
-	sql = """	INSERT OR IGNORE INTO data(council_reference, address, council, description, info_url, date_scraped, on_notice_from, on_notice_to)
+	# replace if exists
+	sql = """	INSERT OR REPLACE INTO data(council_reference, address, council, description, info_url, date_scraped, on_notice_from, on_notice_to)
 				VALUES(?, ?, ?, ?, ?, ?, ?, ?)"""
 	cur = conn.cursor()
 	cur.execute(sql, data)
