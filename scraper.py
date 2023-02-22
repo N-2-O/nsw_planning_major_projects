@@ -8,13 +8,13 @@ import os
 import sqlitedb
 os.environ["SCRAPERWIKI_DATABASE_NAME"] = "sqlite:///data.sqlite"
 
-base_html = "http://www.planningportal.nsw.gov.au"
+base_html = "https://www.planningportal.nsw.gov.au"
 
 #get html from source
 def get_applications(page):
 	#pretend to be an ipad to bypass cloudflare protection with user-agent
 	userAgent = 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
-	return scraperwiki.scrape("http://www.planningportal.nsw.gov.au/major-projects/projects?status=Exhibition&page={}".format(page),"",userAgent) #on exhibition only!
+	return scraperwiki.scrape("https://www.planningportal.nsw.gov.au/major-projects/projects?status=Exhibition&page={}".format(page),"",userAgent) #on exhibition only!
 
 #extract needed data from html
 def get_data(data):
@@ -75,7 +75,7 @@ def main():
 	applications = visit_pages()
 	for app in applications:
 		# print(app)
-		print("----------------------")
+		# print("----------------------")
 		sqlitedb.store_data(app, conn)
 	quit()
 
