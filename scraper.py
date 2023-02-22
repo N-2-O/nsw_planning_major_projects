@@ -61,7 +61,7 @@ def main():
 	applications = visit_pages()
 	
 	for app in applications:
-		print(app)
+		store_data(app)
 	quit()
 
 main()
