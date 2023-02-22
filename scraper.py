@@ -27,29 +27,7 @@ def get_data(data):
 		name = table.find(class_ = "card__title").get_text().strip()
 		link = table.find("a", href = True)["href"]
 		time = datetime.datetime.now().strftime("%x")
-		# print("Reference ID:\t", refId)
-		# print(">\tAddress:\t", address)
-		# print(">\tCouncil:\t", council)
-		# print(">\tDescription:\t", name)
-		# print(">\tLink:\t", link)
-		# print(">\tTime:\t", time)
-		# print("-------------------------------")
-		thisApplication = (
-			refId,
-			address,
-			council,
-			name,
-			base_html + link,
-			time
-		)
-		# thisApplication = {
-		# 	"council_reference" : refId,
-		# 	"address" : address,
-		# 	"council" : council,
-		# 	"description" : name,
-		# 	"info_url" : base_html + link,
-		# 	"date_scraped" : time
-		# }
+		thisApplication = (refId, address, council, name, base_html + link, time)
 		applications.append(thisApplication)
 	return applications
 
@@ -66,31 +44,17 @@ def visit_pages():
 	return applications
 
 def main():
+	# Connect to database
 	conn = sqlitedb.create_database()
 	if conn is not None:
+		# Create table if not already created
 		sqlitedb.create_table(conn)
+		applications = visit_pages()
+		for app in applications:
+			sqlitedb.store_data(app, conn)
 	else:
 		print("Error creating table.")
-
-	applications = visit_pages()
-	for app in applications:
-		# print(app)
-		# print("----------------------")
-		sqlitedb.store_data(app, conn)
 	quit()
 
 if __name__ == '__main__':
 	main()
-
-#
-# # Write out to the sqlite database using scraperwiki library
-# scraperwiki.sqlite.save(unique_keys=['name'], data={"name": "susan", "occupation": "software developer"})
-#
-# # An arbitrary query against the database
-# scraperwiki.sql.select("* from data where 'name'='peter'")
-
-# You don't have to do things with the ScraperWiki and lxml libraries.
-# You can use whatever libraries you want: https://morph.io/documentation/python
-# All that matters is that your final data is written to an SQLite database
-# called "data.sqlite" in the current working directory which has at least a table
-# called "data".
